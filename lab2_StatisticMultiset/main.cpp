@@ -1,4 +1,4 @@
-#include "src\StatisticMultiset.hpp"
+#include "StatisticMultiset.hpp"
 #include <iostream>
 
 int main()
