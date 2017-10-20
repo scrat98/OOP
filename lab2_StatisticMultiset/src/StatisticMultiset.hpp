@@ -40,8 +40,14 @@ public:
 
 private:
     void updateAvg(const T& newNum);
+    
     void updateCacheUnder(const double& threshold, const long& count);
+    void updateCacheUnder(const T& newNum);
+
     void updateCacheAbove(const double& threshold, const long& count);
+    void updateCacheAbove(const T& newNum);
+
+    void updateCaches(const T& newNum);
 
     std::multiset<T> data;
     const int cacheSize;

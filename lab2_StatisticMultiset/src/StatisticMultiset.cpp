@@ -16,6 +16,7 @@ void StatisticMultiset<T>::addNum(const T& number)
 {
     data.insert(number);
     updateAvg(number);
+    updateCaches(number);
 }
 
 template<class T>
@@ -136,6 +137,33 @@ void StatisticMultiset<T>::updateCacheAbove(const double& threshold, const long&
 
     queueAbove.push_back(threshold);
     cacheAbove[threshold] = count;
+}
+
+template<class T>
+void StatisticMultiset<T>::updateCacheUnder(const T& newNum)
+{
+    for (auto &it : cacheUnder) {
+        if (it.first > newNum && cacheUnder.count(it.first)) {
+            cacheUnder[it.first]++;
+        }
+    }
+}
+
+template<class T>
+void StatisticMultiset<T>::updateCacheAbove(const T& newNum)
+{
+    for (auto &it : cacheAbove) {
+        if (it.first < newNum && cacheAbove.count(it.first)) {
+            cacheAbove[it.first]++;
+        }
+    }
+}
+
+template<class T>
+void StatisticMultiset<T>::updateCaches(const T& newNum)
+{
+    updateCacheAbove(newNum);
+    updateCacheUnder(newNum);
 }
 
 template class StatisticMultiset<int>;
