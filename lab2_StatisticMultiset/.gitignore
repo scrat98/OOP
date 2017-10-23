@@ -1,4 +1,5 @@
-/build
-/Win32
-/Win64
-/*.dir
+.vs
+build
+Win32
+Win64
+*.dir
