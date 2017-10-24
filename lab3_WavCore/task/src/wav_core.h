@@ -56,7 +56,6 @@ void print_info( const wav_header_s* header_ptr );
 // Also checks header validity, returns 'WAV_OK' on success.
 wav_errors_e extract_data_int16( const char* filename, std::vector<std::vector<short>>& channels_data );
 
-
 // Creates a new WAV file 'filename', using 'sample_rate' and PCM data from 'channels_data'.
 // Returns 'WAV_OK' on success.
 wav_errors_e make_wav_file( const char* filename, int sample_rate, const std::vector<std::vector<short>>& channels_data );
@@ -91,6 +90,5 @@ wav_errors_e fill_header( wav_header_s* header_ptr, int chan_count, int bits_per
 
 // Fills 'header_ptr' with default values.
 void prefill_header( wav_header_s* header_ptr );
-
 
 #endif // WAV_CORE_H
