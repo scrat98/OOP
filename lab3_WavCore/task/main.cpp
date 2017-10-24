@@ -11,8 +11,8 @@ int main(int argc, char *argv[])
 
     // ################  Tests for WavCore  ################
 
-    const char* input_fname  = "../media/0.wav";
-    const char* output_fname = "../media/0_out.wav";
+    const char* input_fname  = "../../media/0.wav";
+    const char* output_fname = "../../media/0_out.wav";
 
     wav_errors_e err;
     wav_header_s header;
