@@ -19,10 +19,10 @@
 
 #define READ_BYTES(content, arr) content.read(reinterpret_cast<char*>(&arr), sizeof(arr))
 #define WRITE_BYTES(content, arr) content.write(reinterpret_cast<char*>(&arr), sizeof(arr))
-
 #define COMPARE_HEADER_STR(headerData, str) strncmp(reinterpret_cast<char*>(&headerData), str, sizeof(headerData))
+#define GET_NTH_BYTE_OF_NUMBER(number, n) ((number >> (8*n)) & 0xFF)
 
-using byte = int8_t;
+using byte = uint8_t;
 
 class WavReader
 {
@@ -46,7 +46,13 @@ public:
     WavHeader getHeader() const;
 
     /* @Return audio byte data */
-    std::vector<int8_t> getData() const;
+    std::vector<byte> getByteOfData() const;
+
+	/* @Return audio data by channels */
+	std::vector<std::vector<int64_t>> getAudioBuffer() const;
+
+	/* @Return audio data with considering audioDepth */
+	std::vector<int64_t> getSample(uint64_t i) const;
 
     /* @Return the number of audio channels */
     uint16_t getNumChannels() const;
@@ -55,7 +61,7 @@ public:
     uint32_t getSampleRate() const;
 
     /* @Return the number of samples per channel */
-    int getNumSamplesPerChannel() const;
+	uint64_t getNumSamplesPerChannel() const;
 
     /* @Return the byte rate */
     uint32_t getByteRate() const;
@@ -111,33 +117,61 @@ public:
     void clear();
 
     // ============== channels functions =============================
-    void setNumChannels(uint16_t numChannels);
+    // TODO: void setNumChannels(uint16_t numChannels);
+	// You can write code for each way, but I don't want it 
+	// and made only for mono->stereo and stereo->mono
+	// See: https://trac.ffmpeg.org/wiki/AudioChannelManipulation
+
+	/* Convert audio to mono channel */
     void makeMono();
+
+	/* Convert audio to stereo channels */
     void makeStereo();
 
     // ============= reverbiration functions =============================
     // TODO: makeReverb();
-    // TODO: makeSomeEffects();
+    // TODO: makeAudioEffects();
+	// Make reverbiration and some audio effects
+	// I didn't do it, cause it very difficult process for making it properly
+	// See: http://www.ixbt.com/proaudio/theory-of-reverb.shtml
 
     // ======================= cut functions =============================
-    void cut();
-    void cutFromBegin();
-    void cutFromEnd();
+	/* Cut audio data from-to seconds */
+    void cut(double from, double to);
+
+	/* Cut audio data first "time" seconds */
+    void cutFromBegin(double time);
+
+	/* Cut audio data last "time" seconds */
+    void cutFromEnd(double time);
 
     // ===================== sound tone functions ========================
     // TODO: changeToneOfVoice();
-    // TODO: makeSomeEffects();
+    // TODO: makeToneEffects();
+	// Change audio tone and make some effects with tone
 
     // =================== sound and frequency modulation ================
     // TODO: soundModulation();
+	// Change volume of the sound
+
     // TODO: frequencyModulation();
+	// Change range of frequence in audio
+
     // TODO: makeCleanAudio();
+	// Save frequence in range 20-22000 Hz. The rest is noise
+
+	// TODO: speedUp();
+	// TODO: slowDown();
+	// Change speed of the sound. You just change SampleRate
 
     // =================== set audio settings functions ==========================
-    void setAudioBuffer();
-    void setNumSamplesPerChannel(uint16_t numSamples);
-    void setBitDepth(uint16_t numBitsPerSample);
-    void setSampleRate(uint32_t newSampleRate);
+	/* Set audio buffer by vectors of channels */
+	void setAudioBuffer(std::vector<std::vector<int64_t>> buffer);
+
+    // TODO: void setNumSamplesPerChannel(uint16_t numSamples);
+    // TODO: void setBitDepth(uint16_t numBitsPerSample);
+    // TODO: void setSampleRate(uint32_t newSampleRate);
+	// Set basic parameters with SAVE ORIGINAL SOUND
 
     // ==================== Default values for header =============================
     static const uint16_t DEFAULT_NUM_CAHNNELS = 2;
@@ -163,10 +197,16 @@ private:
     void writeData(std::ostream& content);
 
     /* Throw exception if header doesn't ok */
-    void isHeaderCorrect(int32_t fileSize);
+    void isHeaderCorrect(uint32_t fileSize);
 
     /* Get content size in bytes */
-    int getContentSize(std::istream& content);
+	uint32_t getContentSize(std::istream& content) const;
+
+	/*  Make sample from bytes and cut it with max size of the number */
+	uint64_t bytesToSample(uint64_t start, uint16_t sampleSize) const;
+
+	/* Convert int64 to bytes and save it in data */
+	void addSampleToByteData(int64_t sample);
 };
 
 #endif /* WavReader_hpp */

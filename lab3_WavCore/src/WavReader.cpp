@@ -24,9 +24,42 @@ WavHeader WavReader::getHeader() const
     return wavHeader;
 }
 
-std::vector<int8_t> WavReader::getData() const
+std::vector<byte> WavReader::getByteOfData() const
 {
     return data;
+}
+
+std::vector<std::vector<int64_t>> WavReader::getAudioBuffer() const
+{
+	std::vector<std::vector<int64_t>> buffer;
+	uint16_t numChannels = getNumChannels();
+	uint64_t numSamplesPerChannel = getNumSamplesPerChannel();
+	buffer.resize(numChannels);
+
+	for (size_t i = 0; i < numSamplesPerChannel; i++) {
+		auto sample = getSample(i);
+		for (size_t ch = 0; ch < sample.size(); ch++) {
+			buffer[ch].push_back(sample[ch]);
+		}
+	}
+
+	return buffer;
+}
+
+std::vector<int64_t> WavReader::getSample(uint64_t i) const
+{
+	std::vector<int64_t> sample;
+	uint16_t sampleSize = getBitDepth() / WavReader::BYTE_SIZE;
+	uint32_t blockAlign = getBlockAlign();
+
+	uint64_t start = blockAlign * i;
+	uint64_t end = start + blockAlign;
+
+	for (uint64_t pos = start; pos < end; pos += sampleSize) {
+		sample.push_back(bytesToSample(pos, sampleSize));
+	}
+
+	return sample;
 }
 
 uint16_t WavReader::getNumChannels() const
@@ -39,9 +72,9 @@ uint32_t WavReader::getSampleRate() const
     return wavHeader.sampleRate;
 }
 
-int WavReader::getNumSamplesPerChannel() const
+uint64_t WavReader::getNumSamplesPerChannel() const
 {
-    return getDataSize() / getNumChannels();
+    return getDataSize() / getNumChannels() / getBitDepth() * WavReader::BYTE_SIZE;
 }
 
 uint32_t WavReader::getByteRate() const
@@ -153,13 +186,18 @@ void WavReader::clearAudioData()
 void WavReader::resetAudioHeader()
 {
     // set settings
-    setNumChannels(WavReader::DEFAULT_NUM_CAHNNELS);
-    setSampleRate(WavReader::DEFAULT_SAMPLE_RATE);
-    setBitDepth(WavReader::DEFAULT_BIT_DEPTH);
+    // TODO: setNumChannels(WavReader::DEFAULT_NUM_CAHNNELS);
+	wavHeader.numChannels = WavReader::DEFAULT_NUM_CAHNNELS;
+
+    // TODO: setSampleRate(WavReader::DEFAULT_SAMPLE_RATE);
+	wavHeader.sampleRate = WavReader::DEFAULT_SAMPLE_RATE;
+
+    // TODO: setBitDepth(WavReader::DEFAULT_BIT_DEPTH);
+	wavHeader.bitsPerSample = WavReader::DEFAULT_BIT_DEPTH;
 
     // Reset chunk
     std::memcpy(wavHeader.chunkId, "RIFF", sizeof(wavHeader.chunkId));
-    wavHeader.chunkSize = data.size() * WavReader::BYTE_SIZE + 36; // more information in WavHeader.h
+    wavHeader.chunkSize = data.size() * WavReader::BYTE_SIZE + WavReader::HEADER_SIZE - sizeof(wavHeader.chunkId) - sizeof(wavHeader.chunkSize);
 
     // Reset format to "WAVE"
     std::memcpy(wavHeader.format, "WAVE", sizeof(wavHeader.format));
@@ -183,66 +221,120 @@ void WavReader::clear()
 }
 
 // ============== channels functions =============================
-void WavReader::setNumChannels(uint16_t numChannels)
-{
-    
-}
+// TODO: void WavReader::setNumChannels(uint16_t numChannels) {}
 
 void WavReader::makeMono()
 {
-    setNumChannels(1);
+	if (getNumChannels() != 2)
+		throw BadParams("In order to make mono audio must be stereo");
+
+	if (getNumChannels() == 1)
+		return;
+
+	std::vector<std::vector<int64_t>> tmp;
+	tmp.resize(1);
+	for (uint64_t i = 0; i < getNumSamplesPerChannel(); i++) {
+		auto sample = getSample(i);
+		tmp[0].push_back((sample[0] + sample[1]) / 2);
+	}
+	setAudioBuffer(tmp);
+
+	wavHeader.numChannels = 1;
+	wavHeader.byteRate = getBitDepth() * getSampleRate() *  getNumChannels() / WavReader::BYTE_SIZE;
+	wavHeader.blockAlign = getBitDepth() * getNumChannels() / WavReader::BYTE_SIZE;
+	wavHeader.chunkSize = data.size() + WavReader::HEADER_SIZE - sizeof(wavHeader.chunkId) - sizeof(wavHeader.chunkSize);
+	wavHeader.subchunk2Size = data.size();
 }
 
 void WavReader::makeStereo()
 {
-    setNumChannels(2);
+	if (getNumChannels() != 1)
+		throw BadParams("In order to make stereo audio must be mono");
+
+	if (getNumChannels() == 2)
+		return;
+
+	wavHeader.numChannels = 2;
+	wavHeader.sampleRate /= 2;
+	wavHeader.byteRate = getBitDepth() * getSampleRate() *  getNumChannels() / WavReader::BYTE_SIZE;
+	wavHeader.blockAlign = getBitDepth() * getNumChannels() / WavReader::BYTE_SIZE;
+	wavHeader.chunkSize = data.size() + WavReader::HEADER_SIZE - sizeof(wavHeader.chunkId) - sizeof(wavHeader.chunkSize);
+	wavHeader.subchunk2Size = data.size();
 }
 
 // ============= reverbiration functions =============================
-// TODO
+// TODO: WavReader::makeReverb() {}
+// TODO: WavReader::makeAudioEffects() {}
 
 // ======================= cut functions =============================
-void WavReader::cut()
+void WavReader::cut(double from, double to)
 {
+	uint16_t sampleSize = getBitDepth() / WavReader::BYTE_SIZE;
+	uint64_t start = from * getSampleRate() * sampleSize;
+	uint64_t end = to * getSampleRate() * sampleSize;
+	
+	data.erase(data.begin() + start, data.begin() + end);
 
+	wavHeader.chunkSize = data.size() + WavReader::HEADER_SIZE - sizeof(wavHeader.chunkId) - sizeof(wavHeader.chunkSize);
+	wavHeader.subchunk2Size = data.size();
 }
 
-void WavReader::cutFromBegin()
+void WavReader::cutFromBegin(double time)
 {
+	uint64_t samples = time * getSampleRate();
+	uint16_t sampleSize = getBitDepth() / WavReader::BYTE_SIZE;
 
+	data.erase(data.begin(), data.begin() + samples * sampleSize);
+
+	wavHeader.chunkSize = data.size() + WavReader::HEADER_SIZE - sizeof(wavHeader.chunkId) - sizeof(wavHeader.chunkSize);
+	wavHeader.subchunk2Size = data.size();
 }
 
-void WavReader::cutFromEnd()
+void WavReader::cutFromEnd(double time)
 {
+	uint64_t samples = time * getSampleRate();
+	uint16_t sampleSize = getBitDepth() / WavReader::BYTE_SIZE;
 
+	data.erase(data.end() - samples * sampleSize, data.end());
+
+	wavHeader.chunkSize = data.size() + WavReader::HEADER_SIZE - sizeof(wavHeader.chunkId) - sizeof(wavHeader.chunkSize);
+	wavHeader.subchunk2Size = data.size();
 }
 
 // ===================== sound tone functions ========================
-// TODO
+// TODO: WavReader::changeToneOfVoice() {}
+// TODO: WavReader::makeSomeEffects() {}
 
 // =================== sound and frequency modulation ================
-// TODO
+// TODO: WavReader::soundModulation() {}
+// TODO: WavReader::frequencyModulation() {}
+// TODO: WavReader::makeCleanAudio() {}
+// TODO: WavReader::speedUp() {}
+// TODO: WavReader::slowDown() {}
 
 // =================== set audio settings functions ==========================
-void WavReader::setAudioBuffer()
+void WavReader::setAudioBuffer(std::vector<std::vector<int64_t>> buffer)
 {
+	if (!buffer.size())
+		throw BadParams("Buffer can't be empty");
 
+	uint64_t numSamplesPerChannel = buffer[0].size();
+	for (uint64_t ch = 0; ch < buffer.size(); ch++)
+		if (buffer[ch].size() != numSamplesPerChannel)
+			throw BadParams("All channels in buffer must have the same sizes");
+
+	clearAudioData();
+	for (uint64_t sample = 0; sample < numSamplesPerChannel; sample++) {
+		for (uint64_t ch = 0; ch < buffer.size(); ch++) {
+			addSampleToByteData(buffer[ch][sample]);
+		}
+	}
 }
 
-void WavReader::setNumSamplesPerChannel(uint16_t numSamples)
-{
-
-}
-
-void WavReader::setBitDepth(uint16_t numBitsPerSample)
-{
-
-}
-
-void WavReader::setSampleRate(uint32_t newSampleRate)
-{
-
-}
+// TODO: void WavReader::setAudioBuffer() {}
+// TODO: void WavReader::setNumSamplesPerChannel(uint16_t numSamples) {}
+// TODO: void WavReader::setBitDepth(uint16_t numBitsPerSample) {}
+// TODO: void WavReader::setSampleRate(uint32_t newSampleRate) {}
 
 // ====================== Private functions ========================
 void WavReader::readHeader(std::istream& content)
@@ -284,7 +376,7 @@ void WavReader::writeData(std::ostream& content)
     content.write(reinterpret_cast<char*>(&data[0]), data.size() * sizeof(byte));
 }
 
-void WavReader::isHeaderCorrect(int32_t fileSize)
+void WavReader::isHeaderCorrect(uint32_t fileSize)
 {
     // Go to WavHeader.h for details
     uint32_t dataSize = fileSize - WavReader::HEADER_SIZE;
@@ -300,6 +392,10 @@ void WavReader::isHeaderCorrect(int32_t fileSize)
 
     if (COMPARE_HEADER_STR(wavHeader.subchunk1Id, "fmt ") != 0)
         throw HeaderError("HEADER_FMT_ERROR");
+
+	if (wavHeader.bitsPerSample != 8 && wavHeader.bitsPerSample != 16 &&
+		wavHeader.bitsPerSample != 32 && wavHeader.bitsPerSample != 64)
+		throw HeaderError("Bit depth must be 8, 16, 32 or 64 bit");
 
     if (wavHeader.audioFormat != 1)
         throw UnsupportedFormat("HEADER_NOT_PCM");
@@ -323,7 +419,7 @@ void WavReader::isHeaderCorrect(int32_t fileSize)
         throw DataSizeError("Channels don't have the same number of samples");
 }
 
-int WavReader::getContentSize(std::istream& content)
+uint32_t WavReader::getContentSize(std::istream& content) const
 {
     // save current position
     int currentPos = content.tellg();
@@ -336,4 +432,39 @@ int WavReader::getContentSize(std::istream& content)
     content.seekg(currentPos, std::ios::beg);
 
     return fileSize;
+}
+
+uint64_t WavReader::bytesToSample(uint64_t start, uint16_t sampleSize) const
+{
+	int64_t sample;
+
+	if (sampleSize == 1) {
+		int8_t tmp = data[start];
+		sample = tmp;
+	}
+
+	if (sampleSize == 2) {
+		int16_t tmp = (data[start + 1] << 8 | data[start]);
+		sample = tmp;
+	}
+
+	if (sampleSize == 3) {
+		int32_t tmp = (data[start + 2] << 16 | data[start + 1] << 8 | data[start]);
+		sample = tmp;
+	}
+
+	if (sampleSize == 4) {
+		int64_t tmp = (data[start + 3] << 24 | data[start + 2] << 16 | data[start + 1] << 8 | data[start]);
+		sample = tmp;
+	}
+
+	return sample;
+}
+
+void WavReader::addSampleToByteData(int64_t sample)
+{
+	uint16_t sampleSize = getBitDepth() / WavReader::BYTE_SIZE;
+
+	for(uint16_t byte = 0; byte < sampleSize; byte++)
+		data.push_back(GET_NTH_BYTE_OF_NUMBER(sample, byte));
 }
