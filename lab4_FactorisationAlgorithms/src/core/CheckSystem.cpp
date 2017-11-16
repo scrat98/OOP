@@ -71,14 +71,10 @@ void CheckSystem::testForDigits(int startDigits, int endDigits, int cycles) {
             for (auto& algorithm: algorithms) {
                 const auto& algorithmSupplier = algorithm.second;
                 Factorizer factorizer(algorithmSupplier);
-                factorizer.getPrimeFactors(num);
-//                start = clock();
-//                auto trial_factor = trialFactoraizer.getPrimeFactors(num);
-//                summary += clock() - start;
-//                if (!CheckSystem::correctNumberFactorization(trial_factor, num)) {
-//                    std::cout << "Number " << num << " was failed in trial\n";
-//                    break;
-//                }
+                auto primeFactors = factorizer.getPrimeFactors(num);
+                if (!CheckSystem::correctNumberFactorization(primeFactors, num)) {
+                    std::cout << "Number " << num << " was failed in " << algorithm.first << "\n";
+                }
             }
         }
     }

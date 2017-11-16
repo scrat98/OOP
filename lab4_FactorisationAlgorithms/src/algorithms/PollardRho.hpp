@@ -30,7 +30,7 @@ private:
     uint64_t getPseudoRandomNumber(uint64_t x, uint64_t c, uint64_t mod) {
         // return ((powByModulo(x, 2, mod) + c) % mod);
 
-        boost::multiprecision::uint128_t tmp = 1;
+        boost::multiprecision::uint128_t tmp(1);
         tmp = (tmp * x * x) % mod;
         tmp = (tmp + c) % mod;
         return boost::numeric_cast<uint64_t>(tmp);

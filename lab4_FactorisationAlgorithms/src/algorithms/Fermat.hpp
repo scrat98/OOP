@@ -11,7 +11,8 @@ public:
         if (n % 2 == 0) return 2;
 
         uint64_t x = static_cast<uint64_t>(sqrt(n));
-        boost::multiprecision::uint128_t ySquared = x * x - n;
+        boost::multiprecision::uint128_t ySquared(1);
+        ySquared = ySquared * x * x - n;
         for (; x <= n; x++) {
             if (isSquare(ySquared)) {
                 uint64_t y = boost::numeric_cast<uint64_t>(boost::multiprecision::sqrt(ySquared));

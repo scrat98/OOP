@@ -3,7 +3,7 @@
 #include <core/FactorizationAlgorithm.hpp>
 #include <utils/CommonFunctions.hpp>
 
-class TrialDevisionAlgorithm : public FactorizationAlgorithm {
+class TrialDivisionAlgorithm : public FactorizationAlgorithm {
 public:
     uint64_t getFactor(uint64_t n) {
         if (isPrime(n) || n < 2) return n;
@@ -16,6 +16,6 @@ public:
     }
 };
 
-const AlgorithmSupplier TrialDevisionAlgorithmSupplier = []() {
-    return std::make_unique<TrialDevisionAlgorithm>();
+const AlgorithmSupplier TrialDivisionAlgorithmSupplier = []() {
+    return std::make_unique<TrialDivisionAlgorithm>();
 };
