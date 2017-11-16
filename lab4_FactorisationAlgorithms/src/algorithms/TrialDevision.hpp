@@ -15,3 +15,7 @@ public:
         return n;
     }
 };
+
+const AlgorithmSupplier TrialDevisionAlgorithmSupplier = []() {
+  return std::make_unique<TrialDevisionAlgorithm>();
+};

@@ -42,3 +42,7 @@ private:
         c = (Randomizer::getRand<uint64_t>() % (n - 1)) + 1;
     }
 };
+
+const AlgorithmSupplier BrentAlgorithmSupplier = []() {
+  return std::make_unique<BrentAlgorithm>();
+};

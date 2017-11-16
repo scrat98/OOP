@@ -28,3 +28,7 @@ public:
         return n;
     }
 };
+
+const AlgorithmSupplier FermatAlgorithmSupplier = []() {
+  return std::make_unique<FermatAlgorithm>();
+};

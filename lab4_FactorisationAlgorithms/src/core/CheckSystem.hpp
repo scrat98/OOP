@@ -17,10 +17,8 @@ public:
 
     static bool correctNumberFactorization(std::map<uint64_t, uint64_t> factors, uint64_t n);
 
-    template<class Algorithm, class = class std::enable_if<std::is_base_of<FactorizationAlgorithm, Algorithm>::value, Algorithm>::type>
-    void addAlgorithm(const std::string& name) {
-        Algorithm* algorithm = new Algorithm();
-        algorithms[name] = std::unique_ptr<FactorizationAlgorithm>(algorithm);
+    void addAlgorithm(const std::string& name, const AlgorithmSupplier& supplier) {
+        algorithms[name] = supplier;
     }
 
     void deleteAlgorithm(const std::string& name);
@@ -34,5 +32,5 @@ public:
     void testForDigits(int startDigits, int endDigits, int cycles);
 
 private:
-    std::map<std::string, std::unique_ptr<FactorizationAlgorithm>> algorithms;
+    std::map<std::string, AlgorithmSupplier> algorithms;
 };
