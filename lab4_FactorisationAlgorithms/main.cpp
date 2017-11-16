@@ -10,8 +10,8 @@ int main(int argc, char** argv) {
     CheckSystem sys;
     sys.addAlgorithm("trial", TrialDevisionAlgorithmSupplier);
 //    sys.addAlgorithm("fermat", FermatAlgorithmSupplier);
-//    sys.addAlgorithm("pollardRho", PollardPhoAlgorithmSupplier);
-//    sys.addAlgorithm("pollardBrent", BrentAlgorithmSupplier);
+    sys.addAlgorithm("pollardRho", PollardPhoAlgorithmSupplier);
+    sys.addAlgorithm("pollardBrent", BrentAlgorithmSupplier);
     sys.testForDigits(1, 19, 1);
 
     system("pause");

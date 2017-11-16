@@ -30,5 +30,5 @@ public:
 };
 
 const AlgorithmSupplier FermatAlgorithmSupplier = []() {
-  return std::make_unique<FermatAlgorithm>();
+    return std::make_unique<FermatAlgorithm>();
 };

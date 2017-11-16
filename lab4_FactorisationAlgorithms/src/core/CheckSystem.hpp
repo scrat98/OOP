@@ -17,9 +17,7 @@ public:
 
     static bool correctNumberFactorization(std::map<uint64_t, uint64_t> factors, uint64_t n);
 
-    void addAlgorithm(const std::string& name, const AlgorithmSupplier& supplier) {
-        algorithms[name] = supplier;
-    }
+    void addAlgorithm(const std::string& name, const AlgorithmSupplier& supplier);
 
     void deleteAlgorithm(const std::string& name);
 

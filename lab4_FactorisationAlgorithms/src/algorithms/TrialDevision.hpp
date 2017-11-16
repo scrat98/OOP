@@ -17,5 +17,5 @@ public:
 };
 
 const AlgorithmSupplier TrialDevisionAlgorithmSupplier = []() {
-  return std::make_unique<TrialDevisionAlgorithm>();
+    return std::make_unique<TrialDevisionAlgorithm>();
 };

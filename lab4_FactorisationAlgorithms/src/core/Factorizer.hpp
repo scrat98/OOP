@@ -11,9 +11,7 @@ using AlgorithmSupplier = std::function<std::unique_ptr<FactorizationAlgorithm>(
 class Factorizer {
 public:
   explicit Factorizer() = delete;
-  explicit Factorizer(const AlgorithmSupplier& supplier) {
-      algorithm = supplier();
-  }
+  explicit Factorizer(const AlgorithmSupplier& supplier) : algorithm(supplier()){}
 
   std::map<uint64_t, uint64_t> getPrimeFactors(uint64_t n) {
         std::map<uint64_t, uint64_t> prime_factors;

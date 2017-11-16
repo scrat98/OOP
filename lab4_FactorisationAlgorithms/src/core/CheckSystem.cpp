@@ -42,6 +42,10 @@ bool CheckSystem::correctNumberFactorization(std::map<uint64_t, uint64_t> factor
     return true;
 }
 
+void CheckSystem::addAlgorithm(const std::string& name, const AlgorithmSupplier& supplier) {
+    algorithms[name] = supplier;
+}
+
 void CheckSystem::deleteAlgorithm(const std::string& name) {
     algorithms.erase(name);
 }
@@ -64,11 +68,10 @@ void CheckSystem::testForDigits(int startDigits, int endDigits, int cycles) {
     for (int digits = startDigits; digits < endDigits; digits++) {
         for (int i = 0; i < cycles; i++) {
             uint64_t num = CheckSystem::generateRandomNDigitsInteger(digits);
-            for (auto& currentAlg: algorithms) {
-                const auto& algorithmSupplier = currentAlg.second;
+            for (auto& algorithm: algorithms) {
+                const auto& algorithmSupplier = algorithm.second;
                 Factorizer factorizer(algorithmSupplier);
                 factorizer.getPrimeFactors(num);
-            }
 //                start = clock();
 //                auto trial_factor = trialFactoraizer.getPrimeFactors(num);
 //                summary += clock() - start;
@@ -76,6 +79,7 @@ void CheckSystem::testForDigits(int startDigits, int endDigits, int cycles) {
 //                    std::cout << "Number " << num << " was failed in trial\n";
 //                    break;
 //                }
+            }
         }
     }
 }

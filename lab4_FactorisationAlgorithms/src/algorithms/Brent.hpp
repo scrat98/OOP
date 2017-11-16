@@ -44,5 +44,5 @@ private:
 };
 
 const AlgorithmSupplier BrentAlgorithmSupplier = []() {
-  return std::make_unique<BrentAlgorithm>();
+    return std::make_unique<BrentAlgorithm>();
 };

@@ -1,8 +1,5 @@
 #include <utils/CommonFunctions.hpp>
 
-// cicle instead recursion?????????????
-// boost is fastest way????????????????
-
 bool isSquare(boost::multiprecision::uint128_t squared) {
     boost::multiprecision::uint128_t sqrt_val = sqrt(squared);
     boost::multiprecision::uint128_t sqr_val = sqrt_val * sqrt_val;

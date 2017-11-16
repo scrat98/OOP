@@ -44,5 +44,5 @@ private:
 };
 
 const AlgorithmSupplier PollardPhoAlgorithmSupplier = []() {
-  return std::make_unique<PollardPhoAlgorithm>();
+    return std::make_unique<PollardPhoAlgorithm>();
 };
