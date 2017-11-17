@@ -1,7 +1,15 @@
 #include <utils/CommonFunctions.hpp>
 
+void clearScreen() {
+#if defined(WINDOWS) || defined(WIN32) || defined(WIN64) || defined(MSDOS)
+    std::system("cls");
+#else
+    std::system("clear");
+#endif
+}
+
 bool isSquare(boost::multiprecision::uint128_t squared) {
-    boost::multiprecision::uint128_t sqrt_val = sqrt(squared);
+    boost::multiprecision::uint128_t sqrt_val = boost::multiprecision::sqrt(squared);
     boost::multiprecision::uint128_t sqr_val = sqrt_val * sqrt_val;
 
     return sqr_val == squared;
@@ -53,6 +61,17 @@ bool isPrime(uint64_t n) {
         if (gcd(a, n) != 1)
             return false;
         if (powByModulo(a, n - 1, n) != 1)
+            return false;
+    }
+
+    return true;
+}
+
+bool isPrimeTrial(uint64_t n) {
+    if (n <= 2) return true;
+
+    for (uint64_t i = 2; i <= std::ceil(std::sqrt(n)); i++) {
+        if (n % i == 0)
             return false;
     }
 

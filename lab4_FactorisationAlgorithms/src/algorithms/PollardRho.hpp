@@ -6,7 +6,7 @@
 
 class PollardPhoAlgorithm : public FactorizationAlgorithm {
 public:
-    uint64_t getFactor(uint64_t n) {
+    uint64_t getFactor(uint64_t n) override {
         if (isPrime(n) || n < 2) return n;
         if (n % 2 == 0) return 2;
 

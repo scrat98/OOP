@@ -6,8 +6,6 @@
 #include <queue>
 #include <core/FactorizationAlgorithm.hpp>
 
-using AlgorithmSupplier = std::function<std::unique_ptr<FactorizationAlgorithm>()>;
-
 class Factorizer {
 public:
   explicit Factorizer() = delete;

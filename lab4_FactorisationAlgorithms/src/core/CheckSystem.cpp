@@ -18,7 +18,7 @@ uint64_t CheckSystem::generateRandomNDigitsInteger(int digits) {
         int digit = 0;
 
         if (i == 0) {
-            while (1) {
+            while (true) {
                 digit = Randomizer::getRand<int>() % 10;
                 if (digit != 0) break;
             }
@@ -37,9 +37,7 @@ bool CheckSystem::correctNumberFactorization(std::map<uint64_t, uint64_t> factor
         if (!isPrime(factor.first)) return false;
     }
 
-    if (getNumberFromFactors(factors) != n) return false;
-
-    return true;
+    return getNumberFromFactors(factors) == n;
 }
 
 void CheckSystem::addAlgorithm(const std::string& name, const AlgorithmSupplier& supplier) {
@@ -68,14 +66,24 @@ void CheckSystem::testForDigits(int startDigits, int endDigits, int cycles) {
     for (int digits = startDigits; digits < endDigits; digits++) {
         for (int i = 0; i < cycles; i++) {
             uint64_t num = CheckSystem::generateRandomNDigitsInteger(digits);
+
+//            clearScreen();
+            std::cout << "Current digits: " << digits << std::endl;
+            std::cout << "Current stage: " << i << std::endl;
+            std::cout << "Current number: " << num << std::endl;
+
             for (auto& algorithm: algorithms) {
                 const auto& algorithmSupplier = algorithm.second;
                 Factorizer factorizer(algorithmSupplier);
+                time_t start = clock();
                 auto primeFactors = factorizer.getPrimeFactors(num);
+                std::cout << algorithm.first << " time: " << clock() - start << std::endl;
                 if (!CheckSystem::correctNumberFactorization(primeFactors, num)) {
                     std::cout << "Number " << num << " was failed in " << algorithm.first << "\n";
                 }
             }
+
+            std::cout << std::endl;
         }
     }
 }

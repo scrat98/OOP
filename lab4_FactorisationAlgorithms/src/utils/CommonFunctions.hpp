@@ -3,6 +3,9 @@
 #include <boost/multiprecision/cpp_int.hpp>
 #include <core/Randomizer.hpp>
 #include <exception>
+#include <cstdlib>
+
+void clearScreen();
 
 bool isSquare(boost::multiprecision::uint128_t squared);
 
@@ -15,3 +18,5 @@ uint64_t multiplyByModulo(uint64_t a, uint64_t b, uint64_t m);
 uint64_t powByModulo(uint64_t a, uint64_t b, uint64_t m);
 
 bool isPrime(uint64_t n);
+
+bool isPrimeTrial(uint64_t n);
