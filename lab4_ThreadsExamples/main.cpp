@@ -22,9 +22,13 @@ int main() {
     }
 
     for (auto& result : results) {
-        auto res = result.get();
-        std::cout << "Task = " << res.first
-                  << " Number = " << res.second << std::endl;
+        try {
+            auto res = result.get();
+            std::cout << "Task = " << res.first
+                      << " Number = " << res.second << std::endl;
+        } catch (std::exception& e) {
+            std::cout << e.what() << std::endl;
+        }
     }
     std::cout << std::endl;
 
