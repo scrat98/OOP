@@ -1,5 +1,5 @@
-#ifndef LAB4_THREADSEXAMPLES_THREADPOOL_HPP
-#define LAB4_THREADSEXAMPLES_THREADPOOL_HPP
+#ifndef LAB4_THREADEXAMPLES_THREADPOOL_HPP
+#define LAB4_THREADEXAMPLES_THREADPOOL_HPP
 // https://www.youtube.com/watch?v=LL8wkskDlbs&list=PL5jc9xFGsL8E12so1wlMS0r0hTQoJL74M see the lessons
 
 #include <future>
@@ -122,4 +122,4 @@ ThreadPool::~ThreadPool() {
     }
 }
 
-#endif LAB4_THREADSEXAMPLES_THREADPOOL_HPP
+#endif LAB4_THREADEXAMPLES_THREADPOOL_HPP

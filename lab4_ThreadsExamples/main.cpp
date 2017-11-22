@@ -12,7 +12,7 @@ int main() {
     ThreadPool threadPool(4);
     std::vector<std::future<std::pair<int, int>>> results;
 
-    for (int i = 0; i < 1e6; ++i) {
+    for (int i = 0; i < 1e3; ++i) {
         results.emplace_back(
                 threadPool.addTask([](int i, int rand) {
                     int x = (i + rand) * rand;
